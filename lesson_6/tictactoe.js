@@ -2,11 +2,90 @@ const readline = require('readline-sync');
 const INITIAL_MARKER = ' ';
 const HUMAN_MARKER = 'X';
 const COMPUTER_MARKER = 'O';
-const WIN_NUMBER = 5;
 const CURRENT_PLAYER = 'player';
 
+
+// the main minimax function
+function minimax(newBoard, player){
+  
+  //available spots
+  let availSpots = emptySquares(newBoard);
+
+  // checks for the terminal states such as win, lose, and tie 
+  //and returning a value accordingly
+  if (detectWinner(newBoard) === 'Player'){
+    return {score:-10};
+    }
+    else if (detectWinner(newBoard) === 'Computer'){
+      return {score:10};
+    }
+    else if (availSpots.length === 0){
+      return {score:0};
+  }
+
+
+  // an array to collect all the objects
+  var moves = [];
+
+  // loop through available spots
+  for (var i = 0; i < availSpots.length; i++){
+    //create an object for each and store the index of that spot 
+    var move = {};
+  	move.index = availSpots[i];
+
+    // set the empty spot to the current player
+    newBoard[availSpots[i]] = player === 'computer' ? COMPUTER_MARKER : HUMAN_MARKER;
+
+    /*collect the score resulted from calling minimax 
+      on the opponent of the current player*/
+    if (player === 'computer'){
+      var result = minimax(newBoard, 'player');
+      move.score = result.score;
+    }
+    else{
+      var result = minimax(newBoard, 'computer');
+      move.score = result.score;
+    }
+
+    // reset the spot to empty
+    newBoard[availSpots[i]] = ' ';
+
+    // push the object to the array
+    moves.push(move);
+  }
+
+  // if it is the computer's turn loop over the moves and choose the move with the highest score
+  let bestMove;
+  if(player === 'computer'){
+    let bestScore = -10000;
+    for(var i = 0; i < moves.length; i++){
+      if(moves[i].score > bestScore){
+        bestScore = moves[i].score;
+        bestMove = i;
+      }
+    }
+  } else {
+// else loop over the moves and choose the move with the lowest score
+    let bestScore = 10000;
+    for(var i = 0; i < moves.length; i++){
+      if(moves[i].score < bestScore){
+        bestScore = moves[i].score;
+        bestMove = i;
+      }
+    }
+  }
+
+// return the chosen move (object) from the moves array
+  return moves[bestMove];
+
+
+}
+
+
+
+
 function displayBoard(board) {
-    // console.clear();
+    console.clear();
 
     console.log(`You are ${HUMAN_MARKER}. Computer is ${COMPUTER_MARKER}`);
 
@@ -86,43 +165,15 @@ function initializeBoard() {
   }
 
 
-  function findAtRiskSquare (board, defense = true) {
-    let winningLines = [
-        [1, 2, 3], [4, 5, 6], [7, 8, 9], // rows
-        [1, 4, 7], [2, 5, 8], [3, 6, 9], // columns
-        [1, 5, 9], [3, 5, 7]             // diagonals
-      ];
 
-      let marker = defense ? HUMAN_MARKER : COMPUTER_MARKER 
-      for (let line = 0; line < winningLines.length; line++) {
-        let optionArray = winningLines[line].filter((position) => {
-          return board[position] !== marker;
-        })
-        if (optionArray.length === 1 && board[optionArray[0]] === INITIAL_MARKER) {
-          return optionArray[0]; 
-        } 
-      }
-    return null;
-  }
 
   function computerChoosesSquare(board) {
 
-   let square = findAtRiskSquare(board, false) ? findAtRiskSquare(board, false) : findAtRiskSquare(board) 
+   const winningObject = minimax(board, 'computer');
+   const square = winningObject.index;
+   
+   board[square] = COMPUTER_MARKER;
 
-    
-    if (square !== null) {
-        board[square] = COMPUTER_MARKER;
-    } else {
-      if (board[5] === ' ') {
-        board[5] = COMPUTER_MARKER;
-      } else {
-        let randomIndex = Math.floor(Math.random() * emptySquares(board).length);
-        square = emptySquares(board)[randomIndex];
-        board[square] = COMPUTER_MARKER;
-      }
-      
-    }
-    
   }
 
   function boardFull(board) {
@@ -163,18 +214,16 @@ function initializeBoard() {
 
   while (true) {
     let board = initializeBoard();
-        console.log("Who is going to start? Choose computer or player");
-        let currentPlayer = readline.question().trim();
-    
-        if (!["computer", "player"].includes(currentPlayer)) {
-           currentPlayer = CURRENT_PLAYER;
-        }
-
-      
-    
-
-    
+    let currentPlayer;
+    while (true) {
+      console.log("Who is going to start? Choose computer or player");
+      currentPlayer = readline.question().trim();
   
+      if (["computer", "player"].includes(currentPlayer)) break;
+  
+      console.log("Sorry, that's not a valid choice.");
+    }
+
     while (true) {
         displayBoard(board);
         chooseSquare(board, currentPlayer);
@@ -189,8 +238,15 @@ function initializeBoard() {
       console.log("It's a tie!");
     }
   
+    let answer;
+    while (true) {
+
     console.log('Play again? (y or n)');
-    let answer = readline.question().toLowerCase()[0];
+    answer = readline.question().toLowerCase();
+    if (["y", "n"].includes(answer)) break;
+    console.log("Sorry, that's not a valid choice.");
+
+    }
     if (answer !== 'y')  break;
    
   }
