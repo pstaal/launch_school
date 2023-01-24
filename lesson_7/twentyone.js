@@ -176,11 +176,6 @@ while (playerScore < 5 && dealerScore < 5) {
   if (busted(playerTotal)) {
     displayResults(dealerTotal, playerTotal);
     displayEnding (dealerCards, playerCards, dealerTotal, playerTotal, playerScore, dealerScore);
-    if (playAgain()) {
-      continue;
-    } else {
-      break;
-    }
   } else {
     prompt(`You stayed at ${playerTotal}`);
   }
@@ -198,11 +193,6 @@ while (playerScore < 5 && dealerScore < 5) {
   if (busted(dealerTotal)) {
     displayResults(dealerCards, playerCards);
     displayEnding (dealerCards, playerCards, dealerTotal, playerTotal, playerScore, dealerScore);
-    if (playAgain()) {
-      continue;
-    } else {
-      break;
-    }
   } else {
     prompt(`Dealer stays at ${dealerTotal}`);
   }
@@ -213,7 +203,6 @@ while (playerScore < 5 && dealerScore < 5) {
 
   
 
-  if (!playAgain()) break;
 }
 
 if (dealerScore === 5) {
