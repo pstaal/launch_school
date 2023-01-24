@@ -146,6 +146,7 @@ while (playerScore < 5 && dealerScore < 5) {
 
   let playerTotal = total(playerCards);
   let dealerTotal = total(dealerCards);
+  console.clear();
 
   prompt(`Dealer has ${dealerCards[0]} and ?`);
   prompt(`You have: ${playerCards[0]} and ${playerCards[1]}, for a total of ${playerTotal}.`);
@@ -161,6 +162,7 @@ while (playerScore < 5 && dealerScore < 5) {
     }
 
     if (playerTurn === 'h') {
+      console.clear();
       playerCards.push(deck.pop());
       playerTotal = total(playerCards);
       prompt('You chose to hit!');
