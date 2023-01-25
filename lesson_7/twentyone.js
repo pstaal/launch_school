@@ -3,6 +3,9 @@ const readline = require('readline-sync');
 const SUITS = ['H', 'D', 'S', 'C'];
 const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
+let playerScore = 0;
+let dealerScore = 0;
+
 function prompt(message) {
   console.log(`=> ${message}`);
 }
@@ -32,6 +35,10 @@ function initalizeDeck() {
   return shuffle(deck);
 }
 
+function displayScores(playerScore, dealerScore) {
+  prompt (`The current score is player: ${playerScore}, dealer: ${dealerScore}`)
+}
+
 function total(cards) {
   // cards = [['H', '3'], ['S', 'Q'], ... ]
   let values = cards.map(card => card[1]);
@@ -59,9 +66,7 @@ function busted(cards) {
   return total(cards) > 21;
 }
 
-function detectResult(dealerCards, playerCards) {
-  let playerTotal = total(playerCards);
-  let dealerTotal = total(dealerCards);
+function detectResult(dealerTotal, playerTotal) {
 
   if (playerTotal > 21) {
     return 'PLAYER_BUSTED';
@@ -76,44 +81,53 @@ function detectResult(dealerCards, playerCards) {
   }
 }
 
-function displayResults(dealerCards, playerCards) {
-  let result = detectResult(dealerCards, playerCards);
+function displayResults(dealerTotal, playerTotal) {
+  let result = detectResult(dealerTotal, playerTotal);
 
   switch (result) {
     case 'PLAYER_BUSTED':
-      prompt('You busted! Dealer wins!');
+      prompt('You busted! Dealer wins this round!');
       break;
     case 'DEALER_BUSTED':
-      prompt('Dealer busted! You win!');
+      prompt('Dealer busted! You win this round!');
       break;
     case 'PLAYER':
-      prompt('You win!');
+      prompt('You win this round!');
       break;
     case 'DEALER':
-      prompt('Dealer wins!');
+      prompt('Dealer wins this round!');
       break;
     case 'TIE':
       prompt("It's a tie!");
   }
 }
 
+function displayEnding(dealerCards,playerCards,dealerTotal,playerTotal) {
+  console.log('==============');
+  prompt(`Dealer has ${dealerCards}, for a total of: ${dealerTotal}`);
+  prompt(`Player has ${playerCards}, for a total of: ${playerTotal}`);
+  displayScores(playerScore, dealerScore);
+  console.log('==============');
+}
+
 function playAgain() {
   console.log('-------------');
   prompt('Do you want to play again? (y or n)');
   let answer = readline.question();
-  return answer.toLowerCase()[0] === 'y';
+  return answer.toLowerCase()[0] === 'y' || answer.toLowerCase() === 'yes';
 }
 
 function popTwoFromDeck(deck) {
   return [deck.pop(), deck.pop()];
 }
 
-function hand(cards) {
+function getPrintableHand(cards) {
   return cards.map(card => `${card[1]}${card[0]}`).join(' ');
 }
 
 while (true) {
-  prompt('Welcome to Twenty-One!');
+  prompt(`This is round ${1 +playerScore + dealerScore} of Twenty-One! Whoever wins five times first, wins the game`);
+  displayScores(playerScore, dealerScore);
 
   // declare and initialize vars
   let deck = initalizeDeck();
@@ -124,8 +138,11 @@ while (true) {
   playerCards.push(...popTwoFromDeck(deck));
   dealerCards.push(...popTwoFromDeck(deck));
 
+  let playerTotal = total(playerCards);
+  let dealerTotal = total(dealerCards);
+
   prompt(`Dealer has ${dealerCards[0]} and ?`);
-  prompt(`You have: ${playerCards[0]} and ${playerCards[1]}, for a total of ${total(playerCards)}.`);
+  prompt(`You have: ${playerCards[0]} and ${playerCards[1]}, for a total of ${playerTotal}.`);
 
   // player turn
   while (true) {
@@ -133,27 +150,37 @@ while (true) {
     while (true) {
       prompt('Would you like to (h)it or (s)tay?');
       playerTurn = readline.question().toLowerCase();
-      if (['h', 's'].includes(playerTurn)) break;
-      prompt("Sorry, must enter 'h' or 's'.");
+      if (['h', 's', 'hit', 'stay'].includes(playerTurn)) break;
+      prompt("Sorry, must enter 'h','s','hit' or 'stay'");
     }
 
     if (playerTurn === 'h') {
       playerCards.push(deck.pop());
+      console.clear();
+      playerTotal = total(playerCards);
       prompt('You chose to hit!');
-      prompt(`Your cards are now: ${hand(playerCards)}`);
-      prompt(`Your total is now: ${total(playerCards)}`);
+      prompt(`Your cards are now: ${getPrintableHand(playerCards)}`);
+      prompt(`Your total is now: ${playerTotal}`);
     }
 
     if (playerTurn === 's' || busted(playerCards)) break;
   }
 
   if (busted(playerCards)) {
-    displayResults(dealerCards, playerCards);
-    if (playAgain()) {
-      continue;
-    } else {
-      break;
+    console.clear();
+    dealerScore += 1;
+    displayResults(dealerTotal, playerTotal);
+    displayEnding(dealerCards,playerCards,dealerTotal,playerTotal);
+    if (playerScore >= 5 || dealerScore >= 5) {
+      prompt(`${playerScore > dealerScore ? "Player" : "Dealer"} wins the game!`);
+      if (!playAgain()) {
+        break;
+      } else {
+        dealerScore = 0;
+        playerScore = 0;
+      }
     }
+    continue;
   } else {
     prompt(`You stayed at ${total(playerCards)}`);
   }
@@ -164,28 +191,49 @@ while (true) {
   while (total(dealerCards) < 17) {
     prompt(`Dealer hits!`);
     dealerCards.push(deck.pop());
-    prompt(`Dealer's cards are now: ${hand(dealerCards)}`);
+    dealerTotal = total(dealerCards);
+    prompt(`Dealer's cards are now: ${getPrintableHand(dealerCards)}`);
   }
 
   if (busted(dealerCards)) {
-    prompt(`Dealer total is now: ${total(dealerCards)}`);
-    displayResults(dealerCards, playerCards);
-    if (playAgain()) {
-      continue;
-    } else {
-      break;
+    console.clear();
+    playerScore += 1;
+    displayResults(dealerTotal, playerTotal);
+    displayEnding(dealerCards,playerCards,dealerTotal,playerTotal);
+    if (playerScore >= 5 || dealerScore >= 5) {
+      prompt(`${playerScore > dealerScore ? "Player" : "Dealer"} wins the game!`);
+      if (!playAgain()) {
+        break;
+      } else {
+        dealerScore = 0;
+        playerScore = 0;
+      }
     }
+    continue;
   } else {
     prompt(`Dealer stays at ${total(dealerCards)}`);
   }
 
   // both player and dealer stays - compare cards!
-  console.log('==============');
-  prompt(`Dealer has ${dealerCards}, for a total of: ${total(dealerCards)}`);
-  prompt(`Player has ${playerCards}, for a total of: ${total(playerCards)}`);
-  console.log('==============');
+  console.clear();
+  if (dealerTotal > playerTotal) {
+    dealerScore += 1;
+  } else if (dealerTotal < playerTotal){
+    playerScore += 1;
+  }
+  displayResults(dealerTotal, playerTotal);
+  displayEnding(dealerCards,playerCards,dealerTotal,playerTotal);
+ 
 
-  displayResults(dealerCards, playerCards);
+  if (playerScore >= 5 || dealerScore >= 5) {
+    prompt(`${playerScore > dealerScore ? "Player" : "Dealer"} wins the game!`);
+    if (!playAgain()) {
+      break;
+    } else {
+      dealerScore = 0;
+      playerScore = 0;
+    }
+  }
 
-  if (!playAgain()) break;
+  
 }
