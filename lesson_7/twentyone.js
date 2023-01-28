@@ -110,6 +110,10 @@ function displayEnding(dealerCards,playerCards,dealerTotal,playerTotal) {
   console.log('==============');
 }
 
+function gameNotEnded() {
+  return playerScore <= 5 && dealerScore <= 5;
+}
+
 function playAgain() {
   console.log('-------------');
   prompt('Do you want to play again? (y or n)');
@@ -125,7 +129,29 @@ function getPrintableHand(cards) {
   return cards.map(card => `${card[1]}${card[0]}`).join(' ');
 }
 
-while (true) {
+while (gameNotEnded()) {
+  if (dealerScore === 5) {
+     prompt("Dealer wins this game!");
+    if (!playAgain()) {
+      break;
+    } else {
+      dealerScore = 0;
+      playerScore = 0;
+      continue;
+    }
+  } else if (playerScore === 5) {
+     prompt("Player wins this game!");
+    if (!playAgain()) {
+      break;
+    } else {
+      dealerScore = 0;
+      playerScore = 0;
+      continue;
+    }
+
+  }
+
+
   prompt(`This is round ${1 +playerScore + dealerScore} of Twenty-One! Whoever wins five times first, wins the game`);
   displayScores(playerScore, dealerScore);
 
@@ -223,17 +249,5 @@ while (true) {
   }
   displayResults(dealerTotal, playerTotal);
   displayEnding(dealerCards,playerCards,dealerTotal,playerTotal);
- 
-
-  if (playerScore >= 5 || dealerScore >= 5) {
-    prompt(`${playerScore > dealerScore ? "Player" : "Dealer"} wins the game!`);
-    if (!playAgain()) {
-      break;
-    } else {
-      dealerScore = 0;
-      playerScore = 0;
-    }
-  }
-
   
 }
