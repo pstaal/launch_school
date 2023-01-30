@@ -110,7 +110,7 @@ function displayEnding(dealerCards,playerCards,dealerTotal,playerTotal) {
   console.log('==============');
 }
 
-function gameNotEnded() {
+function wonFiveGames(playerScore, dealerScore) {
   return playerScore <= 5 && dealerScore <= 5;
 }
 
@@ -129,7 +129,7 @@ function getPrintableHand(cards) {
   return cards.map(card => `${card[1]}${card[0]}`).join(' ');
 }
 
-while (gameNotEnded()) {
+while (wonFiveGames(playerScore, dealerScore)) {
   if (dealerScore === 5) {
      prompt("Dealer wins this game!");
     if (!playAgain()) {
