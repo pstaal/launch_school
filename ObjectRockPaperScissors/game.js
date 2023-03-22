@@ -5,6 +5,7 @@ function createPlayer() {
   return {
     move: null,
     score: null,
+    moves: [],
   };
 }
 
@@ -16,6 +17,7 @@ function createComputer() {
       const choices = ['rock', 'paper', 'scissors', 'spock', 'lizard'];
       let randomIndex = Math.floor(Math.random() * choices.length);
       this.move = choices[randomIndex];
+      this.moves.push(this.move);
     },
   };
 
@@ -37,6 +39,7 @@ function createHuman() {
       }
 
       this.move = choice;
+      this.moves.push(this.move);
     },
   };
 
@@ -89,6 +92,7 @@ const RPSGame = {
     this.addScore(winner);
   }
   console.log(`${winner === 'tie' ? "It's a tie!" : winner + " wins the round!"}! Current score is you: ${this.human.score}, computer ${this.computer.score}`);
+  console.log(`Previous moves player => ${this.human.moves.join(', ')}, previous moves computer => ${this.computer.moves.join(', ')}`)
 },
 
 displayGameWinner() {
