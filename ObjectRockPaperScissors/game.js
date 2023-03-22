@@ -4,6 +4,7 @@ const readline = require('readline-sync');
 function createPlayer() {
   return {
     move: null,
+    score: null,
   };
 }
 
@@ -65,7 +66,7 @@ const RPSGame = {
   human: createHuman(),
   computer: createComputer(),
 
-  displayWinner() {
+  displayRoundWinner() {
   let humanMove = this.human.move;
   let computerMove = this.computer.move;
 
@@ -75,15 +76,26 @@ const RPSGame = {
   if ((humanMove === 'rock' && computerMove === 'scissors') ||
       (humanMove === 'paper' && computerMove === 'rock') ||
       (humanMove === 'scissors' && computerMove === 'paper')) {
-    console.log('You win!');
+    this.addScore('human');
+    console.log(`You win! Current score is you: ${this.human.score}, computer ${this.computer.score}`);
   } else if ((humanMove === 'rock' && computerMove === 'paper') ||
              (humanMove === 'paper' && computerMove === 'scissors') ||
              (humanMove === 'scissors' && computerMove === 'rock')) {
-    console.log('Computer wins!');
+    this.addScore('computer');
+    console.log(`Computer wins! Current score is you: ${this.human.score}, computer ${this.computer.score}`);
   } else {
-    console.log("It's a tie");
+    console.log(`It's a tie!. Current score is you: ${this.human.score}, computer ${this.computer.score}`);
   }
 },
+
+displayGameWinner() {
+  console.log(`The final score is: you ${this.human.score}, computer ${this.computer.score}`);
+  console.log(`${this.human.score > this.computer.score ? "You win this game" : "Computer wins this game"}`);
+},
+
+  addScore(string) {
+    this[string].score += 1;
+  },
 
   displayWelcomeMessage() {
     console.log('Welcome to Rock, Paper, Scissors!');
@@ -99,18 +111,26 @@ const RPSGame = {
     return answer.toLowerCase()[0] === 'y';
   },
 
-   play() {
+   playGame() {
     this.displayWelcomeMessage();
-    while (true) {
+    while(true){
+        this.playRound();
+        if (!this.playAgain()) break;
+    }
+    this.displayGoodbyeMessage();
+   },
+
+   playRound() {
+    this.human.score = 0;
+    this.computer.score = 0;
+    while (this.human.score < 5 && this.computer.score < 5) {
       this.human.choose();
       this.computer.choose();
-      this.displayWinner();
-      if (!this.playAgain()) break;
+      this.displayRoundWinner(); 
     }
-
-    this.displayGoodbyeMessage();
+    this.displayGameWinner();
   },
 
 };
 
-RPSGame.play();
+RPSGame.playGame();
