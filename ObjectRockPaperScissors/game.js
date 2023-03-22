@@ -13,7 +13,7 @@ function createComputer() {
 
   let computerObject = {
     choose() {
-      const choices = ['rock', 'paper', 'scissors'];
+      const choices = ['rock', 'paper', 'scissors', 'spock', 'lizard'];
       let randomIndex = Math.floor(Math.random() * choices.length);
       this.move = choices[randomIndex];
     },
@@ -30,9 +30,9 @@ function createHuman() {
       let choice;
 
       while (true) {
-        console.log('Please choose rock, paper, or scissors:');
+        console.log('Please choose rock, paper, scissors, spock or lizard:');
         choice = readline.question();
-        if (['rock', 'paper', 'scissors'].includes(choice)) break;
+        if (['rock', 'paper', 'scissors', 'spock', 'lizard'].includes(choice)) break;
         console.log('Sorry, invalid choice.');
       }
 
@@ -56,15 +56,26 @@ function createRule() {
   };
 }
 
-// Since we don't yet know where to put `compare`, let's define
-// it as an ordinary function.
-let compare = function(move1, move2) {
-  // not yet implemented
-};
+
 
 const RPSGame = {
   human: createHuman(),
   computer: createComputer(),
+
+  compare(humanMove, computerMove) {
+    if (humanMove === computerMove) {
+        return 'tie'
+    } else if ((humanMove === 'rock' && (computerMove=== 'scissors' || computerMove === 'lizard')) ||
+        (humanMove === 'paper' && (computerMove === 'rock' || computerMove === 'spock')) ||
+        (humanMove === 'scissors' && (computerMove === 'paper' || computerMove === 'lizard')) ||
+        (humanMove === 'lizard' && (computerMove === 'paper' || computerMove === 'spock')) ||
+        (humanMove === 'spock' && (computerMove === 'scissors' || computerMove === 'rock'))
+        ) {
+       return 'human'
+    } else {
+       return 'computer'
+    }
+ },
 
   displayRoundWinner() {
   let humanMove = this.human.move;
@@ -73,19 +84,11 @@ const RPSGame = {
   console.log(`You chose: ${this.human.move}`);
   console.log(`The computer chose: ${this.computer.move}`);
 
-  if ((humanMove === 'rock' && computerMove === 'scissors') ||
-      (humanMove === 'paper' && computerMove === 'rock') ||
-      (humanMove === 'scissors' && computerMove === 'paper')) {
-    this.addScore('human');
-    console.log(`You win! Current score is you: ${this.human.score}, computer ${this.computer.score}`);
-  } else if ((humanMove === 'rock' && computerMove === 'paper') ||
-             (humanMove === 'paper' && computerMove === 'scissors') ||
-             (humanMove === 'scissors' && computerMove === 'rock')) {
-    this.addScore('computer');
-    console.log(`Computer wins! Current score is you: ${this.human.score}, computer ${this.computer.score}`);
-  } else {
-    console.log(`It's a tie!. Current score is you: ${this.human.score}, computer ${this.computer.score}`);
+  let winner = this.compare(humanMove,computerMove);
+  if (winner !== 'tie') {
+    this.addScore(winner);
   }
+  console.log(`${winner === 'tie' ? "It's a tie!" : winner + " wins the round!"}! Current score is you: ${this.human.score}, computer ${this.computer.score}`);
 },
 
 displayGameWinner() {
