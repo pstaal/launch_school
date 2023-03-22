@@ -13,12 +13,56 @@ function createComputer() {
   let playerObject = createPlayer();
 
   let computerObject = {
-    choose() {
-      const choices = ['rock', 'paper', 'scissors', 'spock', 'lizard'];
-      let randomIndex = Math.floor(Math.random() * choices.length);
-      this.move = choices[randomIndex];
-      this.moves.push(this.move);
+    wins: [],
+
+    createMove(array) {
+        let newArray = [];
+        let totalRounds = this.wins.length;
+        array.forEach(choice => {
+           let object = {};
+           if (this.wins.some(item => item.hasOwnProperty(choice))){  
+            let numberOfWins = this.wins.reduce((acc,val) => {
+                if (val[choice]) {
+                    return acc += 1;
+                } else {
+                    return acc;
+                }
+            }, 0);
+            let winPercentage = (numberOfWins/totalRounds) * 100
+            let weight = this.createRule(winPercentage);
+            object[choice] = weight;
+            newArray.push(object);
+           } else {
+            object[choice] = 1;
+            newArray.push(object);
+           }
+        })
+       
+        let result = [];
+        array.forEach((choice) => {
+           if (newArray.some(item => item[choice] === 2)) {
+            result.push(choice, choice)
+           } else {
+            result.push(choice);
+           }
+        })
+        return result;
+      },
+      
+    createRule(winPercentage) {
+        if (winPercentage > 50){
+            return 2;
+        } else {
+           return 1
+        }
     },
+
+    choose() {
+        const choices = this.createMove(['rock', 'paper', 'scissors', 'spock', 'lizard']);
+        let randomIndex = Math.floor(Math.random() * choices.length);
+        this.move = choices[randomIndex];
+        this.moves.push(this.move);
+        },
   };
 
   return Object.assign(playerObject, computerObject);
@@ -47,17 +91,7 @@ function createHuman() {
 }
 
 
-function createMove() {
-  return {
-    // possible state: type of move (paper, rock, scissors)
-  };
-}
 
-function createRule() {
-  return {
-    // possible state? not clear whether Rules need state
-  };
-}
 
 
 
@@ -91,6 +125,9 @@ const RPSGame = {
   if (winner !== 'tie') {
     this.addScore(winner);
   }
+  let object = {};
+  object[computerMove] = winner === 'computer';
+  this.computer.wins.push(object);
   console.log(`${winner === 'tie' ? "It's a tie!" : winner + " wins the round!"}! Current score is you: ${this.human.score}, computer ${this.computer.score}`);
   console.log(`Previous moves player => ${this.human.moves.join(', ')}, previous moves computer => ${this.computer.moves.join(', ')}`)
 },
